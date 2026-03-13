@@ -1,0 +1,156 @@
+// BudgetAI - Prisma Schema
+// Full database schema for financial tracking and subscription detection
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  avatar        String?
+  currency      String    @default("EUR")
+  locale        String    @default("fr-FR")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  transactions  Transaction[]
+  subscriptions Subscription[]
+  insights      Insight[]
+  uploads       BankUpload[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// BANK UPLOADS
+// ─────────────────────────────────────────────
+model BankUpload {
+  id          String   @id @default(cuid())
+  userId      String
+  filename    String
+  fileType    String   // csv | pdf | xlsx
+  status      String   @default("processing") // processing | done | error
+  errorMsg    String?
+  rowCount    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("bank_uploads")
+}
+
+// ─────────────────────────────────────────────
+// TRANSACTIONS
+// ─────────────────────────────────────────────
+model Transaction {
+  id           String   @id @default(cuid())
+  userId       String
+  uploadId     String?
+  date         DateTime
+  merchant     String
+  description  String?
+  amount       Float    // negative = debit, positive = credit
+  currency     String   @default("EUR")
+  category     Category @default(OTHER)
+  isSubscription Boolean @default(false)
+  subscriptionId String?
+  rawData      String?  // original CSV/PDF row as JSON
+  createdAt    DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upload       BankUpload?   @relation(fields: [uploadId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId, date])
+  @@index([userId, category])
+  @@map("transactions")
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTIONS
+// ─────────────────────────────────────────────
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  normalizedName  String   // lowercase, trimmed for dedup
+  amount          Float
+  currency        String   @default("EUR")
+  frequency       Frequency @default(MONTHLY)
+  firstSeenAt     DateTime
+  lastSeenAt      DateTime
+  nextExpectedAt  DateTime?
+  isActive        Boolean  @default(true)
+  category        Category @default(SUBSCRIPTION)
+  cancelUrl       String?
+  logoUrl         String?
+  color           String?
+  totalSpent      Float    @default(0)
+  occurrences     Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, normalizedName])
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────────
+// INSIGHTS (AI-generated)
+// ─────────────────────────────────────────────
+model Insight {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // monthly_summary | saving_tip | anomaly | projection
+  title     String
+  body      String
+  data      String?  // JSON with chart data or extra context
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("insights")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+enum Category {
+  GROCERIES
+  SUBSCRIPTION
+  RENT
+  TRANSPORT
+  RESTAURANT
+  ENTERTAINMENT
+  UTILITIES
+  HEALTH
+  SHOPPING
+  TRAVEL
+  EDUCATION
+  INVESTMENT
+  INCOME
+  OTHER
+}
+
+enum Frequency {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}

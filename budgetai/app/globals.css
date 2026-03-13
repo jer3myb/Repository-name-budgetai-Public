@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    --font-geist-sans: 'DM Sans', sans-serif;
+    --font-clash: 'Syne', sans-serif;
+    
+    /* Dark theme by default */
+    --bg: 222 47% 6%;
+    --bg-card: 222 40% 9%;
+    --bg-elevated: 222 36% 12%;
+    --border: 222 30% 18%;
+    --text: 210 40% 95%;
+    --text-muted: 215 20% 55%;
+    --accent: 199 89% 48%;
+    --accent-glow: 199 89% 48% / 0.15;
+  }
+
+  * { box-sizing: border-box; }
+  
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-slate-950 text-slate-100;
+    font-family: var(--font-geist-sans);
+    background-image: 
+      radial-gradient(ellipse at 20% 10%, rgba(14, 165, 233, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-clash);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.2);
+  }
+
+  .stat-card {
+    @apply glass-card p-6 transition-all duration-300 hover:border-slate-600/50 hover:shadow-lg;
+  }
+
+  .btn-primary {
+    @apply bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl px-6 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/20 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 rounded-xl px-4 py-2 transition-all duration-200;
+  }
+
+  .input-field {
+    @apply bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition-all duration-200 w-full;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium cursor-pointer;
+  }
+
+  .sidebar-item.active {
+    @apply text-sky-400 bg-sky-500/10 border border-sky-500/20;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.05) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+
+/* Chart tooltips */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+}
